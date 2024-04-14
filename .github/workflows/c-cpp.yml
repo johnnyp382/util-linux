@@ -1,0 +1,40 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - name: check Xcode version
+      run: /usr/bin/xcodebuild -version
+
+    - name: checkout repository
+      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+    - name: configure
+      run: ./configure
+    - name: make
+      run: make
+    - name: make check
+      run: make check
+    - name: build archive
+      run: |
+        xcodebuild -scheme "util-linux" \
+        -archivePath $RUNNER_TEMP/iamgroot.xcarchive \
+        -sdk iphoneos \
+        -configuration Release \
+        -destination generic/platform=iOS \
+        clean archive
+
+        - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: deb
+          path: ${{ runner.temp }}/build/util-linux.deb
